@@ -1,0 +1,59 @@
+name: Setup and Verify
+
+on:
+  push:
+    branches:
+      - main
+      - "automation/**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-vantage-setup-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install and verify workspace
+        run: bash scripts/setup.sh
+
+      - name: Run repository tests when present
+        shell: bash
+        run: |
+          if find . -type f -path "*/test_*.py" -print -quit | grep -q .; then
+            uv run pytest -q
+          else
+            echo "No pytest test files found; skipping test execution."
+          fi
+
+      - name: Report live-check status
+        shell: bash
+        run: |
+          if [[ -n "${ALPHA_VANTAGE_API_KEY:-}" ]]; then
+            echo "Live Alpha Vantage quote verification was enabled."
+          else
+            echo "Live Alpha Vantage quote verification was skipped because the repository secret is not configured."
+          fi
