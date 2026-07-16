@@ -11,20 +11,20 @@ def test_bootstrap_script_is_secure_and_reproducible() -> None:
     assert "uv sync --frozen --all-packages --all-groups" in script
     assert "uv run marketdata-mcp-server --help" in script
     assert "uv run marketdata-cli --help" in script
+    assert "marketdata-cli global_quote IBM" in script
     assert "ALPHA_VANTAGE_API_KEY" in script
     assert "YOUR_API_KEY" not in script
 
 
-def test_github_workflow_uses_python_313_and_secret_backed_live_check() -> None:
+def test_github_workflow_uses_python_313_and_secret_backed_setup() -> None:
     workflow = (ROOT / ".github" / "workflows" / "setup-and-verify.yml").read_text(
         encoding="utf-8"
     )
 
     assert 'python-version: "3.13"' in workflow
     assert "astral-sh/setup-uv@" in workflow
-    assert "uv sync --frozen --all-packages --all-groups" in workflow
+    assert "bash scripts/setup.sh" in workflow
     assert "secrets.ALPHA_VANTAGE_API_KEY" in workflow
-    assert "marketdata-cli global_quote IBM" in workflow
 
 
 def test_operator_documentation_names_required_secret() -> None:
