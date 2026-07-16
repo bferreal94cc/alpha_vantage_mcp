@@ -19,7 +19,7 @@ def test_dashboard_is_installable_and_mobile_ready() -> None:
     assert "serviceWorker.register" in app
 
 
-def test_browser_bundle_never_contains_api_key_variable() -> None:
+def test_browser_bundle_contains_no_credential_or_direct_api_request() -> None:
     browser_files = [
         DASHBOARD / "index.html",
         DASHBOARD / "app.js",
@@ -29,7 +29,10 @@ def test_browser_bundle_never_contains_api_key_variable() -> None:
     ]
 
     for path in browser_files:
-        assert "ALPHA_VANTAGE_API_KEY" not in path.read_text(encoding="utf-8")
+        content = path.read_text(encoding="utf-8")
+        assert "secrets.ALPHA_VANTAGE_API_KEY" not in content
+        assert "apikey=" not in content.lower()
+        assert "alphavantage.co/query" not in content.lower()
 
 
 def test_snapshot_generator_uses_secret_environment_and_sanitizes_errors() -> None:
