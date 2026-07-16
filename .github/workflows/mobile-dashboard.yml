@@ -1,0 +1,103 @@
+name: Mobile Market Dashboard
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+    paths:
+      - "dashboard/**"
+      - "tests/test_dashboard_contract.py"
+      - ".github/workflows/mobile-dashboard.yml"
+  pull_request:
+    paths:
+      - "dashboard/**"
+      - "tests/test_dashboard_contract.py"
+      - ".github/workflows/mobile-dashboard.yml"
+  schedule:
+    - cron: "5 13-22 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mobile-dashboard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked workspace
+        run: uv sync --frozen --all-packages --all-groups
+
+      - name: Run dashboard contract tests
+        run: uv run pytest -q tests/test_dashboard_contract.py
+
+      - name: Validate snapshot generator syntax
+        run: python -m compileall -q dashboard/generate_snapshot.py
+
+      - name: Verify generator without a secret
+        env:
+          ALPHA_VANTAGE_API_KEY: ""
+        run: python dashboard/generate_snapshot.py
+
+  build:
+    if: >-
+      github.event_name != 'pull_request' &&
+      (github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Generate Alpha Vantage snapshot
+        env:
+          ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
+          DASHBOARD_PREMIUM_MODE: ${{ vars.DASHBOARD_PREMIUM_MODE }}
+          DASHBOARD_WATCHLIST: ${{ vars.DASHBOARD_WATCHLIST }}
+          DASHBOARD_FREE_SYMBOLS: ${{ vars.DASHBOARD_FREE_SYMBOLS }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: python dashboard/generate_snapshot.py
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload dashboard artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dashboard
+
+  deploy:
+    if: >-
+      github.event_name != 'pull_request' &&
+      (github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy dashboard to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
