@@ -1,0 +1,33 @@
+{
+  "name": "Alpha Edge Market Dashboard",
+  "short_name": "Alpha Edge",
+  "description": "A secure Alpha Vantage market dashboard for your home screen.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#071018",
+  "theme_color": "#071018",
+  "categories": ["finance", "business", "productivity"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Watchlist",
+      "short_name": "Watchlist",
+      "url": "./#watchlist"
+    },
+    {
+      "name": "Top Movers",
+      "short_name": "Movers",
+      "url": "./#movers"
+    }
+  ]
+}
