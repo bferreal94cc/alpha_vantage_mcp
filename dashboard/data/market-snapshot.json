@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "status": "setup_required",
+  "source": "Alpha Vantage",
+  "generated_at": null,
+  "market_status": {
+    "label": "GitHub data secret required"
+  },
+  "quotes": [],
+  "movers": {
+    "generated_at": null,
+    "gainers": [],
+    "losers": []
+  },
+  "news": [],
+  "notices": [
+    "Add ALPHA_VANTAGE_API_KEY to the repository's GitHub Actions secrets to generate market snapshots.",
+    "The dashboard shell is ready to install. No credential is stored in browser files."
+  ],
+  "errors": []
+}
