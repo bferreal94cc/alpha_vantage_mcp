@@ -63,7 +63,8 @@ jobs:
   build:
     if: >-
       github.event_name != 'pull_request' &&
-      (github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+      (github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+      vars.DASHBOARD_DEPLOY_ENABLED == 'true'
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -91,7 +92,8 @@ jobs:
   deploy:
     if: >-
       github.event_name != 'pull_request' &&
-      (github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+      (github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+      vars.DASHBOARD_DEPLOY_ENABLED == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment:
