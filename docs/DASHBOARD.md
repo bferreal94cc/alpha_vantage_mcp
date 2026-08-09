@@ -30,6 +30,20 @@ Open:
 
 Set **Source** to **GitHub Actions**.
 
+Then create an Actions variable named exactly:
+
+```text
+DASHBOARD_DEPLOY_ENABLED
+```
+
+Set its value to:
+
+```text
+true
+```
+
+This keeps the workflow green in repositories where GitHub Pages has not been configured yet, while still allowing explicit opt-in deployment once Pages is ready.
+
 The deployment workflow publishes the site at:
 
 ```text
@@ -64,6 +78,7 @@ In **Settings → Secrets and variables → Actions → Variables**, the followi
 | `DASHBOARD_WATCHLIST` | Comma-separated symbols requested from the premium bulk quote endpoint | `SPY,QQQ,XSP,ONDS,AAPL,NVDA,AMD,TSLA` |
 | `DASHBOARD_FREE_SYMBOLS` | Up to four priority symbols used for free-tier `GLOBAL_QUOTE` fallback | `SPY,QQQ,XSP,ONDS` |
 | `DASHBOARD_PREMIUM_MODE` | Set to `true` to allow every hourly scheduled refresh | `false` |
+| `DASHBOARD_DEPLOY_ENABLED` | Set to `true` after GitHub Pages is configured so workflow build/deploy jobs run | `false` |
 
 ## Refresh policy
 
